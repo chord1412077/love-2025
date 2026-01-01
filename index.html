@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2025 恋爱年度报告 - 致梦梦</title>
+    <style>
+        /* --- 全局设置 --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: #1a0b14;
+            color: #fff;
+            overflow: hidden; /* 防止此时滚动，由JS或CSS控制滚动容器 */
+        }
+
+        /* 动态背景层 */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #2c0e22 0%, #100818 50%, #291018 100%);
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        .orb-1 { width: 300px; height: 300px; background: #ff4d6d; top: -50px; left: -50px; animation-delay: 0s; }
+        .orb-2 { width: 400px; height: 400px; background: #590d22; bottom: -100px; right: -100px; animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 50px); }
+        }
+
+        /* --- 滚动容器 --- */
+        .swiper-container {
+            height: 100vh;
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* --- 单页样式 --- */
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            opacity: 0; /* 默认隐藏，用于动画 */
+            transition: opacity 0.5s ease;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        /* --- 元素动画 --- */
+        .slide .animate-box {
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .slide.active .animate-box {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* 依次延迟显示 */
+        .slide.active .delay-1 { transition-delay: 0.2s; }
+        .slide.active .delay-2 { transition-delay: 0.4s; }
+        .slide.active .delay-3 { transition-delay: 0.6s; }
+        .slide.active .delay-4 { transition-delay: 0.8s; }
+
+        /* --- 文字排版 --- */
+        h1 { font-size: 2.2rem; font-weight: 300; margin-bottom: 10px; color: #ffccd5; text-shadow: 0 0 10px rgba(255,204,213,0.3); }
+        h2 { font-size: 1.5rem; margin-bottom: 20px; color: #fff0f3; }
+        p { font-size: 1rem; line-height: 1.6; color: #e0e0e0; margin-bottom: 15px; }
+        
+        .highlight {
+            color: #ff4d6d;
+            font-size: 2.8rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            display: block;
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(255, 77, 109, 0.4);
+        }
+
+        .highlight-text {
+            color: #ff8fa3;
+            font-weight: bold;
+        }
+
+        .sub-text {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 340px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .tag {
+            background: rgba(255, 77, 109, 0.2);
+            color: #fff0f3;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* --- 音乐控制 --- */
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: rotate 4s linear infinite;
+        }
+        .music-control.paused {
+            animation-play-state: paused;
+            opacity: 0.5;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- 底部箭头 --- */
+        .arrow-up {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            border-left: 2px solid #fff;
+            border-top: 2px solid #fff;
+            transform: rotate(45deg) translateX(-50%);
+            animation: arrowAnim 1.5s infinite;
+            opacity: 0.7;
+            z-index: 10;
+        }
+
+        @keyframes arrowAnim {
+            0% { transform: rotate(45deg) translate(0, 0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: rotate(45deg) translate(-10px, -10px); opacity: 0; }
+        }
+
+        /* --- 隐藏最后一页的箭头 --- */
+        .last-page-active .arrow-up { display: none; }
+
+        /* --- 图标 --- */
+        .icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 背景 -->
+    <div class="bg-gradient">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <!-- 音乐 (请替换 src 为实际的 mp3 链接, 比如网易云外链或本地文件) -->
+    <!-- 由于浏览器自动播放策略限制，通常需要用户交互后才能播放 -->
+    <div class="music-control" id="musicBtn">🎵</div>
+    <audio id="bgm" loop>
+        <!-- 这里放一个示例空白音频，实际使用请替换 -->
+        <source src="song.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 提示向上滑动的箭头 -->
+    <div class="arrow-up" id="arrow"></div>
+
+    <!-- 滚动容器 -->
+    <div class="swiper-container" id="container">
+
+        <!-- 第1页：封面 -->
+        <section class="slide">
+            <div class="animate-box delay-1">
+                <span style="font-size: 4rem;">❤️</span>
+            </div>
+            <div class="animate-box delay-2">
+                <h1>2025 恋爱报告</h1>
+                <p style="letter-spacing: 2px; margin-top: 10px;">TO: 我最亲爱的梦梦</p>
+            </div>
+            <div class="animate-box delay-3" style="margin-top: 50px;">
+                <p>数据不会说谎</p>
+                <p>但爱会撒娇</p>
+            </div>
+            <div class="animate-box delay-4" style="margin-top: 30px; font-size: 0.8rem; opacity: 0.7;">
+                向上滑动开启回忆
+            </div>
+        </section>
+
+        <!-- 第2页：足迹 -->
+        <section class="slide">
+            <div class="card animate-box delay-1">
+                <span class="icon">📍</span>
+                <h2>我们丈量过的土地</h2>
+                <p>这一年，我们踏足了 <span class="highlight-text">2</span> 座城市</p>
+                <div class="tag-container">
+                    <span class="tag">北京</span>
+                    <span class="tag">山东烟台</span>
+                </div>
+            </div>
+            <div class="animate-box delay-2" style="width: 100%; max-width: 340px;">
+                <p class="sub-text" style="text-align: left; color: #fff; margin-top: 20px;">
+                    还记得吗？<br>
+                    🎢 在环球影城的过山车上大喊大叫<br>
+                    🌊 骑着小电车在滨海中路吹着凉风<br>
+                    🏫 北化校园里的散步<br>
+                    🦁 还有野生动物园的奇遇
+                </p>
+            </div>
+        </section>
+
+        <!-- 第3页：相见与睡眠 -->
+        <section class="slide">
+            <div class="card animate-box delay-1">
+                <span class="icon">👫</span>
+                <p>见面次数</p>
+                <span class="highlight">36 <small style="font-size:1rem">次</small></span>
+                <p class="sub-text">不算多，但每一次都像蓄谋已久的重逢</p>
+            </div>
+            <div class="card animate-box delay-2">
+                <span class="icon">🛌</span>
+                <p>拥抱睡眠</p>
+                <span class="highlight">160 <small style="font-size:1rem">小时</small></span>
+                <p class="sub-text">相当于连续睡了整整 6 天 16 小时<br>(不含睁眼斗嘴的时间哦)</p>
+            </div>
+        </section>
+
+        <!-- 第4页：吃喝玩乐 -->
+        <section class="slide">
+            <div class="animate-box delay-1">
+                <span class="icon">🍲</span>
+                <h2>海底捞 VIP 双人组</h2>
+                <p>吃了 <span class="highlight-text">5</span> 次海底捞</p>
+                <p class="sub-text">
+                    锅底永远是：番茄 + 香辣混搭<br>
+                    你是香油派，我是麻酱派
+                </p>
+            </div>
+            <div class="card animate-box delay-2" style="margin-top: 30px;">
+                <span class="icon">🎬</span>
+                <p>一起看了 1 场电影</p>
+                <p style="font-weight: bold; margin-top:10px;">《疯狂动物城》</p>
+                <p class="sub-text">“尼克狐尼克，你被逮捕了”</p>
+            </div>
+        </section>
+
+        <!-- 第5页：爱的关键词 -->
+        <section class="slide">
+            <div class="animate-box delay-1">
+                <h2>我们的高频词汇</h2>
+            </div>
+            <div class="animate-box delay-2" style="margin: 20px 0;">
+                <p>说了 <span class="highlight-text">378</span> 次“亲亲” 💋</p>
+            </div>
+            <div class="card animate-box delay-3">
+                <span class="icon">👶</span>
+                <p>叫了</p>
+                <span class="highlight">3,081 <small style="font-size:1rem">次</small></span>
+                <p>“宝宝”</p>
+                <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.2); margin: 15px 0;"></div>
+                <p class="sub-text">平均每天 8.4 次<br>我们简直是“宝宝永动机”</p>
+            </div>
+        </section>
+
+        <!-- 第6页：私密心跳 (可以加个模糊遮罩效果增强趣味性) -->
+        <section class="slide">
+            <div class="animate-box delay-1">
+                <span class="icon" style="font-size: 3rem;">🔥</span>
+                <h2>最私密的心跳</h2>
+            </div>
+            <div class="animate-box delay-2">
+                <p>我们 “Do” 了</p>
+                <span class="highlight">46 <small style="font-size:1rem">次</small></span>
+            </div>
+            <div class="animate-box delay-3">
+                <p style="margin-top: 20px;">探索了 <span class="highlight-text">13</span> 种姿势</p>
+                <p class="sub-text">
+                    从生涩到默契<br>
+                    从心跳加速到相视一笑
+                </p>
+            </div>
+        </section>
+
+        <!-- 第7页：总结 -->
+        <section class="slide">
+            <div class="card animate-box delay-1">
+                <p style="font-size: 1.1rem; line-height: 2;">
+                    2025，没有环游世界，<br>
+                    但我们把日子过成了小宇宙。<br>
+                    <br>
+                    吵过小架，<br>
+                    但从没想过分开。
+                </p>
+            </div>
+        </section>
+
+        <!-- 第8页：未来展望 -->
+        <section class="slide" id="last-slide">
+            <div class="animate-box delay-1">
+                <h2>2026，约定好</h2>
+            </div>
+            <div class="animate-box delay-2" style="line-height: 2.2; font-size: 1.1rem;">
+                <p>继续牵着手 👋</p>
+                <p>去更多地方 🌏</p>
+                <p>说更多“宝宝” 🗣️</p>
+                <p>睡更多小时 🛌</p>
+                <p>吃更多好吃 🍱</p>
+                <p style="font-size: 1.4rem; color: #ff4d6d; margin-top: 15px;">爱更多一点 ❤️</p>
+            </div>
+            <div class="animate-box delay-4" style="margin-top: 50px;">
+                <p style="font-family: cursive;">—— 爱你的，冰冰</p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- 音乐播放控制 ---
+        const musicBtn = document.getElementById('musicBtn');
+        const bgm = document.getElementById('bgm');
+        let isPlaying = false;
+
+        musicBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                bgm.pause();
+                musicBtn.classList.add('paused');
+            } else {
+                bgm.play();
+                musicBtn.classList.remove('paused');
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // 尝试自动播放（为了更好的体验，通常需要点击，这里做一个尝试）
+        document.body.addEventListener('click', function() {
+            if (!isPlaying) {
+                bgm.play().then(() => {
+                    isPlaying = true;
+                    musicBtn.classList.remove('paused');
+                }).catch(e => console.log("等待交互播放"));
+            }
+        }, { once: true });
+
+
+        // --- 滚动动画触发 (IntersectionObserver) ---
+        const slides = document.querySelectorAll('.slide');
+        const container = document.getElementById('container');
+        const arrow = document.getElementById('arrow');
+        const lastSlide = document.getElementById('last-slide');
+
+        const observerOptions = {
+            root: container,
+            threshold: 0.5 // 当 slide 出现 50% 时触发
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    
+                    // 检查是否是最后一页，隐藏箭头
+                    if (entry.target.id === 'last-slide') {
+                        document.body.classList.add('last-page-active');
+                    } else {
+                        document.body.classList.remove('last-page-active');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        slides.forEach(slide => {
+            observer.observe(slide);
+        });
+
+    </script>
+</body>
+</html>
